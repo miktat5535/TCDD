@@ -742,6 +742,7 @@ function delGar(id){
   gars=gars.filter(function(x){return x.id!==id;});
   trains=trains.filter(function(t){return t.g!==id;});
   renderGarTbl();renderTrnTbl();renderGarFil();
+  fbSave();
   toast('🗑 '+(lang==='tr'?'Gar silindi':'Station deleted'));
 }
 
@@ -793,6 +794,7 @@ function delTrn(id){
   var inCur=t&&t.g===curGar;
   trains=trains.filter(function(x){return x.id!==id;});
   renderTrnTbl();if(inCur)renderGrid();
+  fbSave();
   toast('🗑 '+(t?t.name:'Tren')+' '+(lang==='tr'?'silindi':'deleted'));
 }
 
@@ -953,7 +955,7 @@ function changePwd(){
   o.value='';n.value='';showToast('Sifre degistirildi!');
 }
 setInterval(function(){
-  if(!curGar||!fbOK())return;
+  if(!fbOK())return;
   fetch(FIREBASE_URL+'/tcdd/updated.json?_='+Date.now())
     .then(function(r){return r.ok?r.json():null;})
     .then(function(ts){
