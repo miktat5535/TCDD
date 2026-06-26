@@ -339,13 +339,13 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13px;}
 </div>
 
 <div class="overlay" id="mAdminTexts">
-  <div class="mBox" style="width:620px;max-height:85vh">
-    <h3 id="mAdminTextsTtl">📝 Tren Bazlı Metinler</h3>
-    <div id="mAdminTextsBody" style="overflow-y:auto;max-height:60vh;padding-right:4px"></div>
-    <div class="mAct">
-      <button class="mCan" onclick="closeMod('mAdminTexts')">İptal / Cancel</button>
-      <button class="mDel" onclick="clearAdminTexts()">♻ Sıfırla</button>
-      <button class="mSav" onclick="saveAdminTexts()">💾 Kaydet & Buluta Gönder</button>
+  <div class="mBox" style="width:640px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column">
+    <h3 id="mAdminTextsTtl" style="flex-shrink:0">📝 Tren Bazlı Metinler</h3>
+    <div id="mAdminTextsBody" style="overflow-y:auto;flex:1;padding-right:6px"></div>
+    <div class="mAct" style="flex-shrink:0;border-top:1px solid var(--border);padding-top:12px;margin-top:8px">
+      <button class="mCan" onclick="closeMod('mAdminTexts')" style="padding:10px 16px;border-radius:7px;border:1px solid var(--border2);background:var(--card2);color:var(--muted);cursor:pointer;font-size:13px;font-weight:700">İptal</button>
+      <button onclick="clearAdminTexts()" style="padding:10px 16px;border-radius:7px;border:none;background:#7f1d1d;color:#fff;cursor:pointer;font-size:13px;font-weight:700">♻ Genel Şablona Dön</button>
+      <button onclick="saveAdminTexts()" style="padding:10px 20px;border-radius:7px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:14px;font-weight:800">💾 Kaydet &amp; Buluta Gönder</button>
     </div>
   </div>
 </div>
@@ -438,7 +438,7 @@ function fill(tmpl,t){
 }
 function getText(t,type){
   var key=t.id+'|'+type+'|'+lang;
-  if(userLocalTexts&&userLocalTexts[key]) return userLocalTexts[key];
+  if(userLocalTexts[key]) return userLocalTexts[key];
   if(t.texts&&t.texts[type+'-'+lang]) return fill(t.texts[type+'-'+lang],t);
   if(t.texts&&t.texts[type+'-tr'])    return fill(t.texts[type+'-tr'],t);
   return fill(tmpls[type+'-'+lang]||tmpls[type+'-tr']||'',t);
@@ -691,9 +691,9 @@ function saveEditTrain(){
 function openText(id){
   var t=trains.find(function(x){return x.id===id;});if(!t)return;
   textEditId=id;
-  document.getElementById('mTextTtl').textContent='⏱ '+(lang==='tr'?'Geçici Metin (Bu Oturum): ':'Temp Text (This Session): ')+t.name;
-  var dTR=userLocalTexts[t.id+'|normal|tr']||getText(t,'normal')||fill(tmpls['normal-tr'],t);
-  var dEN=userLocalTexts[t.id+'|normal|en']||getText({id:t.id,texts:t.texts},'normal')||fill(tmpls['normal-en'],t);
+  document.getElementById('mTextTtl').textContent=(lang==='tr'?'Özel Metin: ':'Custom Text: ')+t.name;
+  var dTR=userLocalTexts[t.id+'|normal|tr']||(t.texts&&t.texts['normal-tr'])||tmpls['normal-tr']||'';
+  var dEN=userLocalTexts[t.id+'|normal|en']||(t.texts&&t.texts['normal-en'])||tmpls['normal-en']||'';
   document.getElementById('tTR').value=dTR;
   document.getElementById('tEN').value=dEN;
   document.getElementById('tPrev').textContent=dTR;
@@ -702,11 +702,10 @@ function openText(id){
 document.getElementById('tTR').addEventListener('input',function(){document.getElementById('tPrev').textContent=this.value;});
 function saveText(){
   var t=trains.find(function(x){return x.id===textEditId;});if(!t)return;
-  if(!userLocalTexts)userLocalTexts={};
   userLocalTexts[t.id+'|normal|tr']=document.getElementById('tTR').value;
   userLocalTexts[t.id+'|normal|en']=document.getElementById('tEN').value;
   closeMod('mText');
-  toast(lang==='tr'?'✏ Bu oturum için kaydedildi':'✏ Saved for this session only');
+  toast(lang==='tr'?'✏ Bu oturum için değiştirildi (kapanınca sıfırlanır)':'✏ Changed for this session only');
 }
 function clearText(){
   var t=trains.find(function(x){return x.id===textEditId;});if(!t)return;
@@ -784,7 +783,7 @@ function renderTrnTbl(){
       '<td style="color:var(--yellow);font-weight:800">'+t.time+'</td>'+
       '<td style="text-align:center">'+(t.p||'?')+'</td><td style="text-align:center">'+(t.y||'?')+'</td>'+
       '<td>'+
-      '<button class="smBtn" style="color:var(--accent2)" data-act="trn-texts" data-id="'+t.id+'">📝 Metinler</button> '+
+      '<button class="smBtn" style="color:var(--accent2)" data-act="trn-texts" data-id="'+t.id+'">📝</button> '+
       '<button class="smBtn" data-act="edit-trn" data-id="'+t.id+'">✎</button> '+
       '<button class="smBtn r" data-act="del-trn" data-id="'+t.id+'">✕</button></td></tr>';
   }).join(''):'<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:20px">Tren yok / No trains</td></tr>';
@@ -1022,37 +1021,47 @@ document.addEventListener('keydown',function(e){
 
 // ===== ADMİN TREN BAZLI METİN =====
 var adminTextsId = null;
-var TK_LABELS = {
-  'normal': {tr:'Normal Duyuru', en:'Normal Announcement'},
-  '20':     {tr:'20 Dakika Öncesi', en:'20 Minutes Before'},
-  '10':     {tr:'10 Dakika Öncesi', en:'10 Minutes Before'},
-  '5':      {tr:'5 Dakika / Son Çağrı', en:'5 Min / Final Call'},
-  'delay':  {tr:'Gecikme Duyurusu', en:'Delay Announcement'},
-  'board':  {tr:'Biniş Duyurusu', en:'Boarding Announcement'},
+var TK_ALL = ['normal','20','10','5','delay','board'];
+var TK_LBL = {
+  normal:{tr:'Normal Duyuru',en:'Normal Announcement'},
+  '20'  :{tr:'20 Dakika Öncesi',en:'20 Minutes Before'},
+  '10'  :{tr:'10 Dakika Öncesi',en:'10 Minutes Before'},
+  '5'   :{tr:'5 Dakika / Son Çağrı',en:'5 Min / Final Call'},
+  delay :{tr:'Gecikme',en:'Delay'},
+  board :{tr:'Biniş',en:'Boarding'},
 };
 function openAdminTexts(id){
   var t=trains.find(function(x){return x.id===id;});if(!t)return;
   adminTextsId=id;
   var el=document.getElementById('mAdminTextsTtl');
-  if(el)el.textContent='📝 '+t.name+' — Tren Bazlı Metinler';
-  var cont=document.getElementById('mAdminTextsBody');
-  if(!cont)return;
+  if(el)el.textContent='📝 '+t.name+' — Duyuru Metinleri';
   if(!t.texts)t.texts={};
-  var html='<div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">'+
-    'Boş bırakırsanız genel şablon kullanılır. <strong style="color:var(--yellow)">Değişkenler: {TREN} {SAAT} {PERON} {YOL}</strong></div>';
-  Object.keys(TK_LABELS).forEach(function(k){
-    var lbl=TK_LABELS[k];
-    var trVal=t.texts[k+'-tr']||'';
-    var enVal=t.texts[k+'-en']||'';
-    var placeholder_tr=fill(tmpls[k+'-tr']||'',t);
-    var placeholder_en=fill(tmpls[k+'-en']||'',t);
-    html+='<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">'+
+  var cont=document.getElementById('mAdminTextsBody');if(!cont)return;
+  var info='<div style="font-size:12px;padding:10px 12px;background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.3);border-radius:7px;color:var(--yellow);margin-bottom:14px;line-height:1.7">'+
+    '<strong>Değişkenler — dokunmayın:</strong><br>'+
+    '<code style="background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-size:12px">{TREN}</code> tren adı &nbsp; '+
+    '<code style="background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-size:12px">{SAAT}</code> kalkış saati &nbsp; '+
+    '<code style="background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-size:12px">{PERON}</code> peron no &nbsp; '+
+    '<code style="background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;font-size:12px">{YOL}</code> yol no'+
+  '</div>';
+  var html=info;
+  TK_ALL.forEach(function(k){
+    var lbl=TK_LBL[k];
+    // Genel şablonu hazır göster — tren bazlı metin varsa onu, yoksa genel şablonu
+    var trVal=t.texts[k+'-tr']!==undefined&&t.texts[k+'-tr']!==''
+      ? t.texts[k+'-tr']
+      : (tmpls[k+'-tr']||'');
+    var enVal=t.texts[k+'-en']!==undefined&&t.texts[k+'-en']!==''
+      ? t.texts[k+'-en']
+      : (tmpls[k+'-en']||'');
+    html+=
+      '<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">'+
       '<div style="font-size:12px;font-weight:800;color:#fff;margin-bottom:6px">📢 '+lbl.tr+' / '+lbl.en+'</div>'+
-      '<div style="font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;font-weight:700">🇹🇷 Türkçe</div>'+
-      '<textarea id="atx-'+k+'-tr" style="width:100%;background:var(--card);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:8px;font-size:13px;font-family:inherit;resize:vertical;min-height:60px;outline:none" placeholder="Boş = genel şablon kullanılır&#10;'+placeholder_tr.replace(/'/g,"&apos;")+'">'+trVal+'</textarea>'+
-      '<div style="font-size:10px;color:var(--muted);margin-bottom:3px;margin-top:6px;text-transform:uppercase;font-weight:700">🇬🇧 English</div>'+
-      '<textarea id="atx-'+k+'-en" style="width:100%;background:var(--card);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:8px;font-size:13px;font-family:inherit;resize:vertical;min-height:60px;outline:none" placeholder="Empty = use global template&#10;'+placeholder_en.replace(/'/g,"&apos;")+'">'+enVal+'</textarea>'+
-    '</div>';
+      '<div style="font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;font-weight:700;letter-spacing:.5px">🇹🇷 Türkçe</div>'+
+      '<textarea id="atx-'+k+'-tr" style="width:100%;background:var(--card);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:9px 10px;font-size:13px;font-family:inherit;resize:vertical;min-height:64px;outline:none;line-height:1.5">'+trVal+'</textarea>'+
+      '<div style="font-size:10px;color:var(--muted);margin-top:6px;margin-bottom:3px;text-transform:uppercase;font-weight:700;letter-spacing:.5px">🇬🇧 English</div>'+
+      '<textarea id="atx-'+k+'-en" style="width:100%;background:var(--card);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:9px 10px;font-size:13px;font-family:inherit;resize:vertical;min-height:64px;outline:none;line-height:1.5">'+enVal+'</textarea>'+
+      '</div>';
   });
   cont.innerHTML=html;
   document.getElementById('mAdminTexts').classList.add('open');
@@ -1060,23 +1069,23 @@ function openAdminTexts(id){
 function saveAdminTexts(){
   var t=trains.find(function(x){return x.id===adminTextsId;});if(!t)return;
   if(!t.texts)t.texts={};
-  Object.keys(TK_LABELS).forEach(function(k){
-    var trEl=document.getElementById('atx-'+k+'-tr');
-    var enEl=document.getElementById('atx-'+k+'-en');
-    if(trEl)t.texts[k+'-tr']=trEl.value;
-    if(enEl)t.texts[k+'-en']=enEl.value;
+  TK_ALL.forEach(function(k){
+    var a=document.getElementById('atx-'+k+'-tr');
+    var b=document.getElementById('atx-'+k+'-en');
+    if(a)t.texts[k+'-tr']=a.value;
+    if(b)t.texts[k+'-en']=b.value;
   });
   closeMod('mAdminTexts');
   fbSave();
-  toast('✅ '+t.name+' metinleri kaydedildi ve buluta gönderildi');
+  toast('✅ '+t.name+' metinleri kaydedildi');
 }
 function clearAdminTexts(){
   var t=trains.find(function(x){return x.id===adminTextsId;});if(!t)return;
-  if(!confirm('Bu trenin tüm özel metinleri silinsin mi? Genel şablonlar kullanılacak.'))return;
+  if(!confirm('Bu trenin özel metinleri silinsin mi? Genel şablona dönecek.'))return;
   t.texts={};
   closeMod('mAdminTexts');
   fbSave();
-  toast('♻ Metinler sıfırlandı, genel şablon kullanılacak');
+  toast('♻ Genel şablona döndürüldü');
 }
 // ===== INIT =====
 renderDrop('');
