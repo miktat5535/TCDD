@@ -337,6 +337,18 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13px;}
     </div>
   </div>
 </div>
+
+<div class="overlay" id="mAdminTexts">
+  <div class="mBox" style="width:620px;max-height:85vh">
+    <h3 id="mAdminTextsTtl">📝 Tren Bazlı Metinler</h3>
+    <div id="mAdminTextsBody" style="overflow-y:auto;max-height:60vh;padding-right:4px"></div>
+    <div class="mAct">
+      <button class="mCan" onclick="closeMod('mAdminTexts')">İptal / Cancel</button>
+      <button class="mDel" onclick="clearAdminTexts()">♻ Sıfırla</button>
+      <button class="mSav" onclick="saveAdminTexts()">💾 Kaydet & Buluta Gönder</button>
+    </div>
+  </div>
+</div>
 <div id="toastEl" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:12px 26px;font-size:13px;color:var(--text);z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:540px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.6)"></div>
 
 <script>
@@ -391,22 +403,22 @@ var gars=[
 ];
 
 var trains=[
-  {id:'t0',g:'basmane',name:'Ege Ekspresi',time:'07:30',p:1,y:2,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t1',g:'basmane',name:'Uşak Treni',time:'08:30',p:2,y:1,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t2',g:'basmane',name:'Alaşehir Treni',time:'09:32',p:3,y:3,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t3',g:'basmane',name:'Alaşehir Treni',time:'11:54',p:1,y:4,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t4',g:'basmane',name:'Uşak Treni',time:'13:51',p:4,y:2,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t5',g:'basmane',name:'İzmir Mavi',time:'16:14',p:5,y:1,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t6',g:'basmane',name:'Konya Mavi',time:'16:52',p:2,y:5,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t7',g:'basmane',name:'Tren',time:'19:55',p:3,y:6,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t8',g:'basmane',name:'Tren',time:'21:00',p:6,y:3,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t9',g:'menemen',name:'Menemen Ekspresi',time:'08:15',p:1,y:1,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t10',g:'menemen',name:'Manisa Treni',time:'10:30',p:2,y:2,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t11',g:'alasehir',name:'Alaşehir Ekspresi',time:'09:00',p:1,y:1,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t12',g:'alasehir',name:'Uşak Aktarmalı',time:'14:20',p:2,y:2,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t13',g:'konya',name:'Konya Mavi',time:'06:45',p:1,y:1,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t14',g:'izmir',name:'İzmir Ekspresi',time:'09:10',p:3,y:2,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
-  {id:'t15',g:'usak',name:'Uşak Ekspresi',time:'07:50',p:1,y:1,status:'normal',audio:null,aName:null,cTR:null,cEN:null},
+  {id:'t0',g:'basmane',name:'Ege Ekspresi',time:'07:30',p:1,y:2,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t1',g:'basmane',name:'Uşak Treni',time:'08:30',p:2,y:1,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t2',g:'basmane',name:'Alaşehir Treni',time:'09:32',p:3,y:3,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t3',g:'basmane',name:'Alaşehir Treni',time:'11:54',p:1,y:4,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t4',g:'basmane',name:'Uşak Treni',time:'13:51',p:4,y:2,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t5',g:'basmane',name:'İzmir Mavi',time:'16:14',p:5,y:1,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t6',g:'basmane',name:'Konya Mavi',time:'16:52',p:2,y:5,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t7',g:'basmane',name:'Tren',time:'19:55',p:3,y:6,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t8',g:'basmane',name:'Tren',time:'21:00',p:6,y:3,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t9',g:'menemen',name:'Menemen Ekspresi',time:'08:15',p:1,y:1,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t10',g:'menemen',name:'Manisa Treni',time:'10:30',p:2,y:2,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t11',g:'alasehir',name:'Alaşehir Ekspresi',time:'09:00',p:1,y:1,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t12',g:'alasehir',name:'Uşak Aktarmalı',time:'14:20',p:2,y:2,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t13',g:'konya',name:'Konya Mavi',time:'06:45',p:1,y:1,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t14',g:'izmir',name:'İzmir Ekspresi',time:'09:10',p:3,y:2,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
+  {id:'t15',g:'usak',name:'Uşak Ekspresi',time:'07:50',p:1,y:1,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}},
 ];
 
 var delayAudio={};
@@ -425,8 +437,10 @@ function fill(tmpl,t){
     .replace(/\{YOL\}/g,String(t.y||'?'));
 }
 function getText(t,type){
-  if(type==='normal'&&lang==='tr'&&t.cTR)return t.cTR;
-  if(type==='normal'&&lang==='en'&&t.cEN)return t.cEN;
+  var key=t.id+'|'+type+'|'+lang;
+  if(userLocalTexts&&userLocalTexts[key]) return userLocalTexts[key];
+  if(t.texts&&t.texts[type+'-'+lang]) return fill(t.texts[type+'-'+lang],t);
+  if(t.texts&&t.texts[type+'-tr'])    return fill(t.texts[type+'-tr'],t);
   return fill(tmpls[type+'-'+lang]||tmpls[type+'-tr']||'',t);
 }
 function toast(msg,dur){
@@ -677,9 +691,9 @@ function saveEditTrain(){
 function openText(id){
   var t=trains.find(function(x){return x.id===id;});if(!t)return;
   textEditId=id;
-  document.getElementById('mTextTtl').textContent=(lang==='tr'?'Özel Metin: ':'Custom Text: ')+t.name;
-  var dTR=t.cTR||fill(tmpls['normal-tr'],t);
-  var dEN=t.cEN||fill(tmpls['normal-en'],t);
+  document.getElementById('mTextTtl').textContent='⏱ '+(lang==='tr'?'Geçici Metin (Bu Oturum): ':'Temp Text (This Session): ')+t.name;
+  var dTR=userLocalTexts[t.id+'|normal|tr']||getText(t,'normal')||fill(tmpls['normal-tr'],t);
+  var dEN=userLocalTexts[t.id+'|normal|en']||getText({id:t.id,texts:t.texts},'normal')||fill(tmpls['normal-en'],t);
   document.getElementById('tTR').value=dTR;
   document.getElementById('tEN').value=dEN;
   document.getElementById('tPrev').textContent=dTR;
@@ -688,10 +702,11 @@ function openText(id){
 document.getElementById('tTR').addEventListener('input',function(){document.getElementById('tPrev').textContent=this.value;});
 function saveText(){
   var t=trains.find(function(x){return x.id===textEditId;});if(!t)return;
-  t.cTR=document.getElementById('tTR').value;
-  t.cEN=document.getElementById('tEN').value;
+  if(!userLocalTexts)userLocalTexts={};
+  userLocalTexts[t.id+'|normal|tr']=document.getElementById('tTR').value;
+  userLocalTexts[t.id+'|normal|en']=document.getElementById('tEN').value;
   closeMod('mText');
-  toast(lang==='tr'?'✏ Özel metin kaydedildi':'✏ Custom text saved');
+  toast(lang==='tr'?'✏ Bu oturum için kaydedildi':'✏ Saved for this session only');
 }
 function clearText(){
   var t=trains.find(function(x){return x.id===textEditId;});if(!t)return;
@@ -768,13 +783,16 @@ function renderTrnTbl(){
     return '<tr><td style="font-weight:700">'+t.name+'</td><td style="color:var(--muted)">'+(g?g.emoji+' '+g.tr:t.g)+'</td>'+
       '<td style="color:var(--yellow);font-weight:800">'+t.time+'</td>'+
       '<td style="text-align:center">'+(t.p||'?')+'</td><td style="text-align:center">'+(t.y||'?')+'</td>'+
-      '<td><button class="smBtn" data-act="edit-trn" data-id="'+t.id+'">✎</button> '+
+      '<td>'+
+      '<button class="smBtn" style="color:var(--accent2)" data-act="trn-texts" data-id="'+t.id+'">📝 Metinler</button> '+
+      '<button class="smBtn" data-act="edit-trn" data-id="'+t.id+'">✎</button> '+
       '<button class="smBtn r" data-act="del-trn" data-id="'+t.id+'">✕</button></td></tr>';
   }).join(''):'<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:20px">Tren yok / No trains</td></tr>';
 }
 document.getElementById('trnTbl').addEventListener('click',function(e){
   var btn=e.target.closest('[data-act]');if(!btn)return;
-  if(btn.dataset.act==='edit-trn')openEdit(btn.dataset.id);
+  if(btn.dataset.act==='trn-texts')openAdminTexts(btn.dataset.id);
+  else if(btn.dataset.act==='edit-trn')openEdit(btn.dataset.id);
   else if(btn.dataset.act==='del-trn')delTrn(btn.dataset.id);
 });
 function trnModOpen(){
@@ -790,7 +808,7 @@ function saveTrn(){
   var time=document.getElementById('taTime').value.trim();
   if(!name){toast('⚠ Tren adı boş olamaz');return;}
   if(!/^\d{2}:\d{2}$/.test(time)){toast('⚠ Format SS:DD olmalı');return;}
-  trains.push({id:'t'+Date.now(),g:garId,name:name,time:time,p:taPeron,y:taYol,status:'normal',audio:null,aName:null,cTR:null,cEN:null});
+  trains.push({id:'t'+Date.now(),g:garId,name:name,time:time,p:taPeron,y:taYol,status:'normal',audio:null,aName:null,cTR:null,cEN:null,texts:{}});
   closeMod('mTrn');renderTrnTbl();fbSave();
   toast('✅ '+name+' '+(lang==='tr'?'eklendi':'added'));
 }
@@ -819,6 +837,7 @@ function saveTmpls(){
     var a=document.getElementById('tpl-'+d.k+'-tr'),b=document.getElementById('tpl-'+d.k+'-en');
     if(a)tmpls[d.k+'-tr']=a.value;if(b)tmpls[d.k+'-en']=b.value;
   });
+  fbSave();
   toast('✅ '+(lang==='tr'?'Şablonlar kaydedildi':'Templates saved'));
 }
 
@@ -868,6 +887,7 @@ var _fbMeta = document.getElementById('tcdd-fb-meta');
 var FIREBASE_URL = localStorage.getItem('tcdd_firebase_url') || (_fbMeta && _fbMeta.content) || '';
 var ADMIN_PW = localStorage.getItem('tcdd_admin_pw') || 'TCDDAdmin';
 var fbLastTs = 0;
+var userLocalTexts = {};
 
 function fbOK(){
   return FIREBASE_URL && FIREBASE_URL.length > 15 &&
@@ -885,7 +905,7 @@ function fbLoad(manual){
     .then(function(d){
       if(d){
         if(d.gars&&d.gars.length)gars=d.gars;
-        if(d.trains&&d.trains.length)trains=d.trains;
+        if(d.trains&&d.trains.length){trains=d.trains;userLocalTexts={};}
         if(d.tmpls&&Object.keys(d.tmpls).length)tmpls=d.tmpls;
         if(d.updated)fbLastTs=d.updated;
       }
@@ -999,6 +1019,65 @@ document.addEventListener('keydown',function(e){
   var m=document.getElementById('mPwd');
   if(e.key==='Enter'&&m&&m.style.display==='flex')checkPwd();
 });
+
+// ===== ADMİN TREN BAZLI METİN =====
+var adminTextsId = null;
+var TK_LABELS = {
+  'normal': {tr:'Normal Duyuru', en:'Normal Announcement'},
+  '20':     {tr:'20 Dakika Öncesi', en:'20 Minutes Before'},
+  '10':     {tr:'10 Dakika Öncesi', en:'10 Minutes Before'},
+  '5':      {tr:'5 Dakika / Son Çağrı', en:'5 Min / Final Call'},
+  'delay':  {tr:'Gecikme Duyurusu', en:'Delay Announcement'},
+  'board':  {tr:'Biniş Duyurusu', en:'Boarding Announcement'},
+};
+function openAdminTexts(id){
+  var t=trains.find(function(x){return x.id===id;});if(!t)return;
+  adminTextsId=id;
+  var el=document.getElementById('mAdminTextsTtl');
+  if(el)el.textContent='📝 '+t.name+' — Tren Bazlı Metinler';
+  var cont=document.getElementById('mAdminTextsBody');
+  if(!cont)return;
+  if(!t.texts)t.texts={};
+  var html='<div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">'+
+    'Boş bırakırsanız genel şablon kullanılır. <strong style="color:var(--yellow)">Değişkenler: {TREN} {SAAT} {PERON} {YOL}</strong></div>';
+  Object.keys(TK_LABELS).forEach(function(k){
+    var lbl=TK_LABELS[k];
+    var trVal=t.texts[k+'-tr']||'';
+    var enVal=t.texts[k+'-en']||'';
+    var placeholder_tr=fill(tmpls[k+'-tr']||'',t);
+    var placeholder_en=fill(tmpls[k+'-en']||'',t);
+    html+='<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">'+
+      '<div style="font-size:12px;font-weight:800;color:#fff;margin-bottom:6px">📢 '+lbl.tr+' / '+lbl.en+'</div>'+
+      '<div style="font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;font-weight:700">🇹🇷 Türkçe</div>'+
+      '<textarea id="atx-'+k+'-tr" style="width:100%;background:var(--card);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:8px;font-size:13px;font-family:inherit;resize:vertical;min-height:60px;outline:none" placeholder="Boş = genel şablon kullanılır&#10;'+placeholder_tr.replace(/'/g,"&apos;")+'">'+trVal+'</textarea>'+
+      '<div style="font-size:10px;color:var(--muted);margin-bottom:3px;margin-top:6px;text-transform:uppercase;font-weight:700">🇬🇧 English</div>'+
+      '<textarea id="atx-'+k+'-en" style="width:100%;background:var(--card);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:8px;font-size:13px;font-family:inherit;resize:vertical;min-height:60px;outline:none" placeholder="Empty = use global template&#10;'+placeholder_en.replace(/'/g,"&apos;")+'">'+enVal+'</textarea>'+
+    '</div>';
+  });
+  cont.innerHTML=html;
+  document.getElementById('mAdminTexts').classList.add('open');
+}
+function saveAdminTexts(){
+  var t=trains.find(function(x){return x.id===adminTextsId;});if(!t)return;
+  if(!t.texts)t.texts={};
+  Object.keys(TK_LABELS).forEach(function(k){
+    var trEl=document.getElementById('atx-'+k+'-tr');
+    var enEl=document.getElementById('atx-'+k+'-en');
+    if(trEl)t.texts[k+'-tr']=trEl.value;
+    if(enEl)t.texts[k+'-en']=enEl.value;
+  });
+  closeMod('mAdminTexts');
+  fbSave();
+  toast('✅ '+t.name+' metinleri kaydedildi ve buluta gönderildi');
+}
+function clearAdminTexts(){
+  var t=trains.find(function(x){return x.id===adminTextsId;});if(!t)return;
+  if(!confirm('Bu trenin tüm özel metinleri silinsin mi? Genel şablonlar kullanılacak.'))return;
+  t.texts={};
+  closeMod('mAdminTexts');
+  fbSave();
+  toast('♻ Metinler sıfırlandı, genel şablon kullanılacak');
+}
 // ===== INIT =====
 renderDrop('');
 tick();
