@@ -2,6 +2,7 @@
 <html lang='tr'>
 <head>
 <meta charset='UTF-8'>
+<meta name="tcdd-fb" content="">
 <meta name='viewport' content='width=device-width,initial-scale=1.0'>
 <title>TCDD Duyuru Yönetim Sistemi</title>
 <style>
@@ -243,7 +244,17 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13px;}
           <button onclick="testFbUrl()" style="background:var(--card2);border:1px solid var(--border2);color:var(--muted);padding:8px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700">Baglanti Test</button>
           <button onclick="saveFbUrl()" style="background:var(--accent);border:none;color:#fff;padding:8px 16px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:700">Kaydet</button>
         </div>
-        <div id="fbTestRes" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
+        <div id="fbTestRes" style="font-size:12px;color:var(--muted);margin-top:8px">
+        <div id="fbDlArea" style="display:none;background:rgba(34,165,90,.1);border:1px solid var(--green);border-radius:8px;padding:12px;margin-top:10px">
+          <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px">✅ URL kaydedildi!</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.6">
+            URL'yi tüm gişelere dağıtmak için HTML'yi indirip Netlify'e yükleyin.<br>
+            Böylece tüm gişeler Firebase URL'yi otomatik bilir.
+          </div>
+          <button onclick="downloadHtml()" style="background:var(--green);color:#fff;border:none;border-radius:7px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;width:100%">
+            📥 Güncellenmiş HTML'yi İndir (Netlify'e Yükle)
+          </button>
+        </div></div>
         <div style="border-top:1px solid rgba(245,197,24,.3);padding-top:14px;margin-top:14px">
           <div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:6px">Ilk Veri Yukleme</div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:8px">URL kaydettikten sonra tiklayin. Tum garlar ve trenler Firebase'e yuklenir.</div>
@@ -490,7 +501,11 @@ function selectGar(id){
   document.getElementById('pSearch').value='';
   showView('vStation');updateUI();renderGrid();fbLoad(false);
 }
-function goPortal(){curGar=null;announced={};stopAll();showView('vPortal');renderDrop('');}
+function goPortal(){curGar=null;announced={};stopAll();showView('vPortal');if(!FIREBASE_URL){
+  var fb=document.getElementById('fbBanner');
+  if(fb)fb.classList.add('show');
+}
+renderDrop('');}
 function openAdmin(){showView('vAdmin');renderGarTbl();renderTrnTbl();renderGarFil();renderDelayList();buildTmplFields();}
 
 // ===== CLOCK =====
@@ -859,7 +874,8 @@ function doTab(btn,secId){
 
 
 // ===== FIREBASE + SIFRE =====
-var FIREBASE_URL = localStorage.getItem('tcdd_firebase_url') || '';
+var FIREBASE_URL_META = (document.querySelector('meta[name=tcdd-fb]')||{}).content||'';
+var FIREBASE_URL = localStorage.getItem('tcdd_firebase_url') || FIREBASE_URL_META || '';
 var ADMIN_PW = localStorage.getItem('tcdd_admin_pw') || 'TCDDAdmin';
 var fbLastTs = 0;
 
@@ -884,7 +900,9 @@ function fbLoad(manual){
         if(d.updated)fbLastTs=d.updated;
       }
       setSS('ok','Bagli - '+new Date().toLocaleTimeString('tr-TR'));
-      if(manual){showToast('Firebase verileri yuklendi');renderGrid();}
+      renderDrop('');
+      if(curGar)renderGrid();
+      if(manual)showToast('Firebase verileri yuklendi');
     })
     .catch(function(e){setSS('err','Hata: '+e.message);if(manual)showToast('Firebase hatasi: '+e.message);});
 }
@@ -908,14 +926,31 @@ function ilkYukleme(){
   .catch(function(e){if(el){el.textContent='Hata: '+e.message;el.style.color='var(--red)';}showToast('Hata: '+e.message);});
 }
 function saveFbUrl(){
-  var u=document.getElementById('fbUrlInput').value.trim();
+  var u=(document.getElementById('fbUrlInput')||{}).value;
+  if(u)u=u.trim();
   if(!u){showToast('URL bos');return;}
   if(!u.startsWith('https://')||(u.indexOf('firebaseio.com')<0&&u.indexOf('firebasedatabase.app')<0)){
-    showToast('Gecersiz URL. https:// ile baslamali + firebaseio.com veya firebasedatabase.app icermeli');return;
+    showToast('Gecersiz URL. https:// ile baslamali, firebaseio.com veya firebasedatabase.app icermeli');return;
   }
-  FIREBASE_URL=u;localStorage.setItem('tcdd_firebase_url',u);
+  FIREBASE_URL=u;
+  localStorage.setItem('tcdd_firebase_url',u);
+  // meta tag guncelle
+  var mt=document.querySelector('meta[name=tcdd-fb]');
+  if(mt)mt.setAttribute('content',u);
   showToast('URL kaydedildi. Test ediliyor...');
   setTimeout(function(){fbLoad(true);},300);
+  // Download linki goster
+  var dl=document.getElementById('fbDlArea');
+  if(dl)dl.style.display='block';
+}
+function downloadHtml(){
+  var html=document.documentElement.outerHTML;
+  var blob=new Blob([html],{type:'text/html'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='TCDD_Sistem.html';
+  a.click();
+  showToast('HTML indirildi! Netlify e yukleyin - tum giseler otomatik guncellenecek.');
 }
 function testFbUrl(){
   var u=document.getElementById('fbUrlInput').value.trim()||FIREBASE_URL;
@@ -956,6 +991,7 @@ function changePwd(){
 }
 setInterval(function(){
   if(!fbOK())return;
+  if(!curGar)return;
   fetch(FIREBASE_URL+'/tcdd/updated.json?_='+Date.now())
     .then(function(r){return r.ok?r.json():null;})
     .then(function(ts){
