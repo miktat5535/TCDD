@@ -522,7 +522,6 @@ function tick(){
   var dl=document.getElementById('fbDlArea');
   if(dl&&FIREBASE_URL) dl.style.display='block';
   var fi=document.getElementById('fbUrlInput');
-  // Sadece input odaklanmamışsa ve boşsa güncelle (kullanıcı yazarken ezme!)
   if(fi && document.activeElement!==fi && !fi.value) fi.value=FIREBASE_URL;
 }
 
@@ -916,45 +915,43 @@ function fbLoad(manual){
       setSS('ok','Bagli - '+new Date().toLocaleTimeString('tr-TR'));
       renderDrop('');
       if(curGar) renderGrid();
-      if(manual) showToast('Firebase verileri yuklendi');
+      if(manual) toast('Firebase verileri yuklendi');
     })
-    .catch(function(e){setSS('err','Hata: '+e.message);if(manual)showToast('Firebase hatasi: '+e.message);});
+    .catch(function(e){setSS('err','Hata: '+e.message);if(manual)toast('Firebase hatasi: '+e.message);});
 }
 function fbSave(){
-  if(!fbOK()){showToast('Firebase URL girilmemis - Admin > Firebase sekmesi');return;}
+  if(!fbOK()){toast('Firebase URL girilmemis - Admin > Firebase sekmesi');return;}
   var ts=Date.now();fbLastTs=ts;
   fetch(FIREBASE_URL+'/tcdd.json',{method:'PUT',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({gars:gars,trains:trains,tmpls:tmpls,updated:ts})})
-  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);setSS('ok','Kaydedildi');showToast('Buluta kaydedildi!');})
-  .catch(function(e){setSS('err','Hata');showToast('Kayit hatasi: '+e.message);});
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);setSS('ok','Kaydedildi');toast('Buluta kaydedildi!');})
+  .catch(function(e){setSS('err','Hata');toast('Kayit hatasi: '+e.message);});
 }
 function ilkYukleme(){
-  if(!fbOK()){showToast('Once Firebase URL girin!');return;}
+  if(!fbOK()){toast('Once Firebase URL girin!');return;}
   var el=document.getElementById('ilkYuklemeRes');
   if(el){el.textContent='Yukleniyor...';el.style.color='var(--yellow)';}
   fetch(FIREBASE_URL+'/tcdd.json',{method:'PUT',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({gars:gars,trains:trains,tmpls:tmpls,updated:Date.now()})})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);
     if(el){el.textContent='Tamam: '+gars.length+' gar, '+trains.length+' tren yuklendi!';el.style.color='var(--green)';}
-    showToast('Firebase yuklendi!',5000);})
-  .catch(function(e){if(el){el.textContent='Hata: '+e.message;el.style.color='var(--red)';}showToast('Hata: '+e.message);});
+    toast('Firebase yuklendi!',5000);})
+  .catch(function(e){if(el){el.textContent='Hata: '+e.message;el.style.color='var(--red)';}toast('Hata: '+e.message);});
 }
 function saveFbUrl(){
   var inp = document.getElementById('fbUrlInput');
   if(!inp) return;
   var u = inp.value.trim();
-  if(!u){ showToast('URL cannot be empty'); return; }
+  if(!u){ toast('URL boş olamaz!'); return; }
   var valid = u.startsWith('https://') && (u.indexOf('firebaseio.com') >= 0 || u.indexOf('firebasedatabase.app') >= 0);
-  if(!valid){ showToast('Geçersiz URL. https:// ile başlamalı ve firebaseio.com veya firebasedatabase.app içermeli'); return; }
-  // Save to memory + localStorage (+ sessionStorage yedek olarak)
+  if(!valid){ toast('Geçersiz URL! https:// ile başlamalı, firebaseio.com veya firebasedatabase.app içermeli'); return; }
   FIREBASE_URL = u;
   try { localStorage.setItem('tcdd_firebase_url', u); } catch(e) {}
   try { sessionStorage.setItem('tcdd_firebase_url', u); } catch(e) {}
   var mt = document.getElementById('tcdd-fb-meta');
   if(mt) mt.setAttribute('content', u);
-  showToast('URL kaydedildi. Bağlantı test ediliyor...');
+  toast('✅ URL kaydedildi. Bağlantı test ediliyor...');
   fbLoad(true);
-  // Show download area
   var dl = document.getElementById('fbDlArea');
   if(dl) dl.style.display = 'block';
 }
@@ -971,7 +968,7 @@ function downloadUpdatedHtml(){
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
-  showToast('Downloaded! Upload this file to Netlify — all panels will auto-sync.', 5000);
+  toast('Downloaded! Upload this file to Netlify — all panels will auto-sync.', 5000);
 }
 function testFbUrl(){
   var u=document.getElementById('fbUrlInput').value.trim()||FIREBASE_URL;
@@ -1005,10 +1002,10 @@ function checkPwd(){
 function changePwd(){
   var o=document.getElementById('pwdOld'),n=document.getElementById('pwdNew');
   if(!o||!n)return;
-  if(o.value!==ADMIN_PW){showToast('Mevcut sifre yanlis!');return;}
-  if(n.value.length<4){showToast('Min 4 karakter');return;}
+  if(o.value!==ADMIN_PW){toast('Mevcut sifre yanlis!');return;}
+  if(n.value.length<4){toast('Min 4 karakter');return;}
   ADMIN_PW=n.value;localStorage.setItem('tcdd_admin_pw',ADMIN_PW);
-  o.value='';n.value='';showToast('Sifre degistirildi!');
+  o.value='';n.value='';toast('Sifre degistirildi!');
 }
 setInterval(function(){
   if(!fbOK() || !curGar) return;
