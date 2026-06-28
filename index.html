@@ -522,7 +522,8 @@ function tick(){
   var dl=document.getElementById('fbDlArea');
   if(dl&&FIREBASE_URL) dl.style.display='block';
   var fi=document.getElementById('fbUrlInput');
-  if(fi) fi.value=FIREBASE_URL;
+  // Sadece input odaklanmamışsa ve boşsa güncelle (kullanıcı yazarken ezme!)
+  if(fi && document.activeElement!==fi && !fi.value) fi.value=FIREBASE_URL;
 }
 
 // ===== SCHEDULE =====
@@ -883,7 +884,11 @@ function doTab(btn,secId){
 
 // ===== FIREBASE + SIFRE =====
 var _fbMeta = document.getElementById('tcdd-fb-meta');
-var FIREBASE_URL = localStorage.getItem('tcdd_firebase_url') || (_fbMeta && _fbMeta.content) || '';
+var FIREBASE_URL = (function(){
+  try { var v=localStorage.getItem('tcdd_firebase_url'); if(v) return v; } catch(e) {}
+  try { var v=sessionStorage.getItem('tcdd_firebase_url'); if(v) return v; } catch(e) {}
+  return (_fbMeta && _fbMeta.content) || '';
+})();
 var ADMIN_PW = localStorage.getItem('tcdd_admin_pw') || 'TCDDAdmin';
 var fbLastTs = 0;
 var userLocalTexts = {};
@@ -940,13 +945,14 @@ function saveFbUrl(){
   var u = inp.value.trim();
   if(!u){ showToast('URL cannot be empty'); return; }
   var valid = u.startsWith('https://') && (u.indexOf('firebaseio.com') >= 0 || u.indexOf('firebasedatabase.app') >= 0);
-  if(!valid){ showToast('Invalid URL. Must start with https:// and contain firebaseio.com or firebasedatabase.app'); return; }
-  // Save to memory + localStorage + meta tag
+  if(!valid){ showToast('Geçersiz URL. https:// ile başlamalı ve firebaseio.com veya firebasedatabase.app içermeli'); return; }
+  // Save to memory + localStorage (+ sessionStorage yedek olarak)
   FIREBASE_URL = u;
-  localStorage.setItem('tcdd_firebase_url', u);
+  try { localStorage.setItem('tcdd_firebase_url', u); } catch(e) {}
+  try { sessionStorage.setItem('tcdd_firebase_url', u); } catch(e) {}
   var mt = document.getElementById('tcdd-fb-meta');
   if(mt) mt.setAttribute('content', u);
-  showToast('URL saved. Testing connection...');
+  showToast('URL kaydedildi. Bağlantı test ediliyor...');
   fbLoad(true);
   // Show download area
   var dl = document.getElementById('fbDlArea');
